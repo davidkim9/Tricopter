@@ -7,25 +7,26 @@ PIDdata pidStablePitch;
 PIDdata pidStableYaw;
 
 void controllerSetup(){
-  pidRateRoll.P = 1;
-  pidRateRoll.I = 0.7;
-  pidRateRoll.D = -2;
+  //PID VALUES
+  pidRateRoll.P = ROLL_PITCH_P;
+  pidRateRoll.I = ROLL_PITCH_I;
+  pidRateRoll.D = ROLL_PITCH_D;
   pidRateRoll.lastError = 0;
   pidRateRoll.previousPIDTime = 0;
   pidRateRoll.integratedError = 0;
   pidRateRoll.windupGuard = 500;
   
-  pidRatePitch.P = 1;
-  pidRatePitch.I = 0.7;
-  pidRatePitch.D = -2;
+  pidRatePitch.P = ROLL_PITCH_P;
+  pidRatePitch.I = ROLL_PITCH_I;
+  pidRatePitch.D = ROLL_PITCH_D;
   pidRatePitch.lastError = 0;
   pidRatePitch.previousPIDTime = 0;
   pidRatePitch.integratedError = 0;
   pidRatePitch.windupGuard = 500;
   
-  pidRateYaw.P = 2;
-  pidRateYaw.I = 1.5;
-  pidRateYaw.D = -3;
+  pidRateYaw.P = YAW_P;
+  pidRateYaw.I = YAW_I;
+  pidRateYaw.D = YAW_D;
   pidRateYaw.lastError = 0;
   pidRateYaw.previousPIDTime = 0;
   pidRateYaw.integratedError = 0;
@@ -48,8 +49,26 @@ void controllerSetup(){
   pidStablePitch.windupGuard = 500;
 }
 
+float yawSmooth;
+//Low pass filter
+//http://playground.arduino.cc/main/smooth
+int smooth(int data, float filterVal, float smoothedVal){
+  if (filterVal > 1){      // check to make sure param's are within range
+    filterVal = .99;
+  }
+  else if (filterVal <= 0){
+    filterVal = 0;
+  }
+  smoothedVal = (data * (1 - filterVal)) + (smoothedVal  *  filterVal);
+  return (int)smoothedVal;
+}
+
 //http://aeroquad.com/showthread.php?1167-Stable-Mode-Explained
 void controllerLoop(){
+  
+  //Stable mode if not switched
+  stableMode = 1400 < aux1.getValue() && 1600 > aux1.getValue();
+  
   //Controls are backwards
   targetYaw = map(rudder.getScaledValue(), 1000, 2000, -180, 180);
   targetPitch = map(elevator.getScaledValue(), 1000, 2000, 45, -45);
@@ -58,14 +77,25 @@ void controllerLoop(){
   targetYaw = 0;
   targetPitch = 0;
   targetRoll = 0;
-  
-  //Stable mode input
-  targetRoll = updatePID(targetRoll, yprAngle[2], &pidStableRoll);
-  targetPitch = updatePID(targetPitch, yprAngle[1], &pidStablePitch);
   */
-  outputRoll = updatePID(targetRoll, -gx, &pidRateRoll);
-  outputPitch = updatePID(targetPitch, gy, &pidRatePitch);
-  outputYaw = updatePID(targetYaw, gz, &pidRateYaw);
+  
+  if(stableMode){
+    //Stable mode input
+    outputRoll = updatePID(targetRoll, yprAngle[2], &pidStableRoll);
+    outputPitch = updatePID(targetPitch, yprAngle[1], &pidStablePitch);
+    //Gyro
+    outputRoll = updatePID(outputRoll, -gx, &pidRateRoll);
+    outputPitch = updatePID(outputPitch, gy, &pidRatePitch);
+    outputYaw = updatePID(targetYaw, gz, &pidRateYaw);
+  }else{
+    outputRoll = updatePID(targetRoll, -gx, &pidRateRoll);
+    outputPitch = updatePID(targetPitch, gy, &pidRatePitch);
+    outputYaw = updatePID(targetYaw, gz, &pidRateYaw);
+  }
+  
+  //ADD LOW PASS FILTER TO SERVO
+  //Without this, the rear servo will jitter on tricopters
+  outputYaw = smooth(outputYaw, SERVO_FILTER, yawSmooth);
   
   outputRoll = constrain(outputRoll, -200, 200);
   outputPitch = constrain(outputPitch, -200, 200);

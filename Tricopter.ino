@@ -50,7 +50,7 @@ void process100HzTask(){
 }
 
 void process10HzTask(){
-  
+  /*
   Serial.print(yprAngle[0]); Serial.print('\t');
   Serial.print(yprAngle[1]); Serial.print('\t');
   Serial.print(yprAngle[2]); Serial.print('\t');
@@ -59,12 +59,8 @@ void process10HzTask(){
   Serial.print(gy); Serial.print('\t');
   Serial.print(gz); Serial.print('\t');
   
-  Serial.print(throttle.getValue()); Serial.print('\t');
-  Serial.print(rudder.getValue()); Serial.print('\t');
-  Serial.print(aileron.getValue()); Serial.print('\t');
-  Serial.print(elevator.getValue()); Serial.print('\t');
-  
   Serial.print(armed?"ARMED":"NOT ARMED"); Serial.print('\t');
+  Serial.print(stableMode?"STABLE MODE":"MANUAL MODE"); Serial.print('\t');
   
   Serial.print(targetRoll); Serial.print('\t');
   Serial.print(targetPitch); Serial.print('\t');
@@ -75,7 +71,7 @@ void process10HzTask(){
   Serial.print(outputYaw); Serial.print('\t');
   
   Serial.println();
-  
+  */
   if(armed){
     //Check if throttle is off
     if( throttle.getValue() < MIN_THROTTLE ){
