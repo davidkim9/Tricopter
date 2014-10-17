@@ -1,6 +1,5 @@
 #include <I2Cdev.h>
 #include <Wire.h>
-#include <Servo.h>
 
 #include "Variables.h"
 
@@ -18,8 +17,6 @@
 #include "Controller.h"
 
 //Timekeeping
-
-unsigned long t100Hz;
 unsigned long t10Hz;
 unsigned long t2Hz;
 unsigned long t1Hz;
@@ -45,10 +42,6 @@ void setup()
   controllerSetup();
 }
 
-void process100HzTask(){
-  
-}
-
 void process10HzTask(){
   /*
   Serial.print(yprAngle[0]); Serial.print('\t');
@@ -58,6 +51,11 @@ void process10HzTask(){
   Serial.print(gx); Serial.print('\t');
   Serial.print(gy); Serial.print('\t');
   Serial.print(gz); Serial.print('\t');
+  
+  Serial.print(throttle.getScaledValue()); Serial.print('\t');
+  Serial.print(rudder.getScaledValue()); Serial.print('\t');
+  Serial.print(aileron.getScaledValue()); Serial.print('\t');
+  Serial.print(elevator.getScaledValue()); Serial.print('\t');
   
   Serial.print(armed?"ARMED":"NOT ARMED"); Serial.print('\t');
   Serial.print(stableMode?"STABLE MODE":"MANUAL MODE"); Serial.print('\t');
@@ -124,7 +122,9 @@ void process1HzTask(){
 
 void loop()
 {
+  //Scale the time with the servo timer
   currentTime = micros();
+  
   dt = currentTime - previousTime;
   previousTime = currentTime;
   
@@ -132,15 +132,7 @@ void loop()
   RCLoop();
   
   //Process gyroscope data
-  
-  //unsigned long gyroBM = micros();
   gyroLoop();
-  //Serial.println(micros() - gyroBM);
-  
-  if(currentTime - t100Hz > 10000){
-    process100HzTask();
-    t100Hz = currentTime;
-  }
   
   if(currentTime - t10Hz > 100000){
     process10HzTask();

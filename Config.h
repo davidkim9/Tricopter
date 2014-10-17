@@ -14,18 +14,25 @@
 
 #define LED_PIN 13
 
+//RC Input Pins
+#define AILERON_TRIM -14
+#define ELEVATOR_TRIM -6
+#define THROTTLE_TRIM 0
+#define RUDDER_TRIM -8
+
 //Microseconds, 5 seconds = 5000000
 #define MAX_ARM_TIME 5000000
 
 //PID VALUES
-#define ROLL_PITCH_P 1.0
-#define ROLL_PITCH_I 1.0
-#define ROLL_PITCH_D -2.0
+#define ROLL_PITCH_P 0.9
+#define ROLL_PITCH_I 0.7
+#define ROLL_PITCH_D 0.2
+#define ROLL_PITCH_P_GUARD 200
+#define ROLL_PITCH_I_GUARD 500
 
-#define YAW_P 8.0
+#define YAW_P 10.0
 #define YAW_I 0
 #define YAW_D 0.1
-
 
 #define SERVO_FILTER 0.6
 
@@ -48,3 +55,5 @@
 
 #define MIN_AUX1 1100
 #define MAX_AUX1 1900
+
+//1000/61.0

@@ -3,11 +3,12 @@
 
 class RCChannel {
 public:
-RCChannel(int p, int minV, int maxV) {
+RCChannel(int p, int minV, int maxV, int t) {
   pin = p;
   value = 0;
   minValue = minV;
   maxValue = maxV;
+  trim = t;
 };
 
 void calcPin(){
@@ -21,7 +22,7 @@ void calcPin(){
 }
 
 void copyValue(){
-  value = shared;
+  value = shared + trim;
   scaledValue = constrain( map(value, minValue, maxValue, 1000, 2000), 1000, 2000);
 }
 
@@ -34,6 +35,7 @@ uint32_t getScaledValue(){
 }
 
 private:
+  int trim;
   uint8_t pin;
   uint32_t startTime;
   volatile uint32_t shared;

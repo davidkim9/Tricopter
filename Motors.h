@@ -1,63 +1,97 @@
-Servo leftServo;
-Servo rightServo;
-Servo rearServo;
-Servo yawServo;
-
 long rcyaw, rcpit, rcroll; 
+
+volatile uint8_t atomicServo = 125;
 
 void motorsSetup(){
   
-  leftServo.attach(LEFT_MOTOR_OUT_PIN);
-  rightServo.attach(RIGHT_MOTOR_OUT_PIN);
-  rearServo.attach(REAR_MOTOR_OUT_PIN);
-  yawServo.attach(YAW_MOTOR_OUT_PIN);
+  pinMode(LEFT_MOTOR_OUT_PIN, OUTPUT);
+  pinMode(RIGHT_MOTOR_OUT_PIN, OUTPUT);
+  pinMode(REAR_MOTOR_OUT_PIN, OUTPUT);
   
-  yawServo.writeMicroseconds(1500);
+  pinMode(YAW_MOTOR_OUT_PIN, OUTPUT);
+  
+  //Add interrupt for servo on timer0
+  TCCR0A = 0; // normal counting mode
+  TIMSK0 |= (1<<OCIE0A); // Enable CTC interrupt
+  
+  //Set servo to middle
+  atomicServo = (MIDCOMMAND-1000)/4;
   
   //Arm the motors
-  leftServo.writeMicroseconds(1000);
-  rightServo.writeMicroseconds(1000);
-  rearServo.writeMicroseconds(1000);
+  analogWrite(LEFT_MOTOR_OUT_PIN, MINCOMMAND / 8);
+  analogWrite(RIGHT_MOTOR_OUT_PIN, MINCOMMAND / 8);
+  analogWrite(REAR_MOTOR_OUT_PIN, MINCOMMAND / 8);
 }
 
 void motorsLoop(){
+  //inFlight = true;
   if(inFlight){
     //Cap the throttle so we can at least have some control
     int throttleValue = constrain(throttle.getScaledValue(), 1000, 1900);
-    
+    //throttleValue = 1500;
     int frontLeftValue = throttleValue - outputRoll + outputPitch*2/3;
     int frontRightValue = throttleValue + outputRoll + outputPitch*2/3;
     int rearValue = throttleValue - outputPitch*4/3;
-    int yawCommand = constrain(MIDCOMMAND + outputYaw, 1250, 1750);
+    int yawCommand = constrain(MIDCOMMAND - outputYaw, 1200, 1800);
     
-    //Make sure the motors dont turn off in flight
-    frontLeftValue = max(frontLeftValue, MINTHRUST);
-    frontRightValue = max(frontRightValue, MINTHRUST);
-    rearValue = max(rearValue, MINTHRUST);
+    //Make sure the motors dont turn off in flight and PWM size isnt greater than 2000
+    frontLeftValue = constrain(frontLeftValue, MINTHRUST, MAXCOMMAND);
+    frontRightValue = constrain(frontRightValue, MINTHRUST, MAXCOMMAND);
+    rearValue = constrain(rearValue, MINTHRUST, MAXCOMMAND);
     
-    if(leftServo.readMicroseconds() != frontLeftValue){
-      leftServo.writeMicroseconds(frontLeftValue);
-    }
+    analogWrite(LEFT_MOTOR_OUT_PIN, frontLeftValue / 8);
+    analogWrite(RIGHT_MOTOR_OUT_PIN, frontRightValue / 8);
+    analogWrite(REAR_MOTOR_OUT_PIN, rearValue / 8);
     
-    if(rightServo.readMicroseconds() != frontRightValue){
-      rightServo.writeMicroseconds(frontRightValue);
-    }
+    atomicServo = (yawCommand-1000)/4;
+    /*
+    Serial.print(frontLeftValue); Serial.print('\t');
+    Serial.print(frontRightValue); Serial.print('\t');
     
-    if(rearServo.readMicroseconds() != rearValue){
-      rearServo.writeMicroseconds(rearValue);
-    }
+    Serial.print(outputRoll); Serial.print('\t');
+    Serial.print(outputYaw); Serial.print('\t');
     
-    if(yawServo.readMicroseconds() != yawCommand){
-      yawServo.writeMicroseconds(yawCommand);
-    }
-    
+    Serial.println();
+    */
   }else{
-    if(leftServo.readMicroseconds() != MINCOMMAND)
-      leftServo.writeMicroseconds(MINCOMMAND);
-    if(rightServo.readMicroseconds() != MINCOMMAND)
-      rightServo.writeMicroseconds(MINCOMMAND);
-    if(rearServo.readMicroseconds() != MINCOMMAND)
-      rearServo.writeMicroseconds(MINCOMMAND);
+    //Turn off motors
+    analogWrite(LEFT_MOTOR_OUT_PIN, MINCOMMAND / 8);
+    analogWrite(RIGHT_MOTOR_OUT_PIN, MINCOMMAND / 8);
+    analogWrite(REAR_MOTOR_OUT_PIN, MINCOMMAND / 8);
   }
   
+}
+
+//AeroQuad tricopter servo interrupt service routine
+//This will limit the servo output to 50hz
+ISR(TIMER0_COMPA_vect) {
+  static uint8_t state = 0;
+  
+  if (state == 0) {
+    //http://billgrundmann.wordpress.com/2009/03/03/to-use-or-not-use-writedigital/
+    //Turn on pin
+    PORTD |= 1<<5;
+    OCR0A+= 250;
+    state++;
+  } else if (state == 1) {
+    //Keep pin turned on for a duration
+    OCR0A+= atomicServo; // 1000 + [0-1020] us
+    state++;
+  } else if (state == 2) {
+    //Turn off pin
+    PORTD &= ~(1<<5);
+    OCR0A+= 250;
+    state++;
+  }else{
+    //On even states
+    if(!state & 0x1){
+      OCR0A+= 250;
+    }
+    if(state == 19){
+      state = 0;
+      OCR0A+= 250;
+    }else{
+      state++;
+    }
+  }
 }

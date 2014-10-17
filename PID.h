@@ -9,6 +9,7 @@ struct PIDdata {
   double previousPIDTime;
   double integratedError;
   double windupGuard;
+  double pGuard;
 };
 
 double updatePID(double targetPosition, double currentPosition, struct PIDdata *PIDparameters) {
@@ -29,7 +30,7 @@ double updatePID(double targetPosition, double currentPosition, struct PIDdata *
   double dTerm = PIDparameters->D * (currentPosition - PIDparameters->lastError) / (deltaPIDTime * 100); // dT fix from Honk
   PIDparameters->lastError = currentPosition;
 
-  return (PIDparameters->P * error) + (PIDparameters->I * PIDparameters->integratedError) + dTerm;
+  return constrain(PIDparameters->P * error, -PIDparameters->pGuard, PIDparameters->pGuard) + (PIDparameters->I * PIDparameters->integratedError) + dTerm;
 }
 
 #endif
