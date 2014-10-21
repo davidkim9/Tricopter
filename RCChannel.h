@@ -9,6 +9,7 @@ RCChannel(int p, int minV, int maxV, int t) {
   minValue = minV;
   maxValue = maxV;
   trim = t;
+  shared = (maxValue + minValue) / 2 - trim;
 };
 
 void calcPin(){
@@ -32,6 +33,10 @@ uint32_t getValue(){
 
 uint32_t getScaledValue(){
   return scaledValue;
+}
+
+uint32_t getSignalTime(){
+  return startTime;
 }
 
 private:

@@ -47,6 +47,12 @@ void RCLoop(){
   aux1.copyValue();
 }
 
+//Check if remote signal is still there
+bool checkRemote(){
+  uint32_t now = micros();
+  return now - throttle.getSignalTime() < SIGNAL_TIMEOUT && now - rudder.getSignalTime() < SIGNAL_TIMEOUT && now - aileron.getSignalTime() < SIGNAL_TIMEOUT && now - elevator.getSignalTime() < SIGNAL_TIMEOUT;
+}
+
 
 #endif
 

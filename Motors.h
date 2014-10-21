@@ -23,11 +23,29 @@ void motorsSetup(){
   analogWrite(REAR_MOTOR_OUT_PIN, MINCOMMAND / 8);
 }
 
+long lastDethrottleTime = 0;
+
 void motorsLoop(){
-  //inFlight = true;
+  
   if(inFlight){
-    //Cap the throttle so we can at least have some control
-    int throttleValue = constrain(throttle.getScaledValue(), 1000, 1900);
+    
+    if(signalPresent){
+      //Cap the throttle so we can at least have some control
+      throttleValue = constrain(throttle.getScaledValue(), 1000, 1900);
+    }else{
+      //Decrease throttle every 50ms
+      if(currentTime - lastDethrottleTime > 100000){
+        throttleValue = constrain(throttleValue - 1, 1000, 1900);
+        lastDethrottleTime - currentTime;
+        //Shut off motor, but stay armed.
+        if(throttleValue == 1000){
+          inFlight = 0;
+          armed = 1;
+          armTime = currentTime;
+        }
+      }
+    }
+    
     //throttleValue = 1500;
     int frontLeftValue = throttleValue - outputRoll + outputPitch*2/3;
     int frontRightValue = throttleValue + outputRoll + outputPitch*2/3;

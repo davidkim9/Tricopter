@@ -23,9 +23,6 @@ unsigned long t1Hz;
 
 bool ledBlink = HIGH;
 
-bool throttleOff = 1;
-uint32_t armTime;
-
 void setup()
 {
   Serial.begin(9600);
@@ -59,6 +56,8 @@ void process10HzTask(){
   
   Serial.print(armed?"ARMED":"NOT ARMED"); Serial.print('\t');
   Serial.print(stableMode?"STABLE MODE":"MANUAL MODE"); Serial.print('\t');
+  Serial.print(signalPresent?"REMOTE CONNECTED":"REMOTE NOT CONNECTED"); Serial.print('\t');
+  Serial.print(throttleValue); Serial.print('\t');
   
   Serial.print(targetRoll); Serial.print('\t');
   Serial.print(targetPitch); Serial.print('\t');
@@ -70,6 +69,7 @@ void process10HzTask(){
   
   Serial.println();
   */
+  
   if(armed){
     //Check if throttle is off
     if( throttle.getValue() < MIN_THROTTLE ){
@@ -104,6 +104,9 @@ void process2HzTask(){
       }
     }
   }
+  
+  //Check if signal is present
+  signalPresent = checkRemote();
   
   if(!gyroIsStable() && !armed){
     digitalWrite(LED_PIN, ledBlink);

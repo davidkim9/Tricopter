@@ -20,21 +20,28 @@
 #define THROTTLE_TRIM 0
 #define RUDDER_TRIM -8
 
+//Exponential x^EXPO
+#define EXPO_ROLL_PITCH 2.2
+#define EXPO_YAW 1.5
+
 //Microseconds, 5 seconds = 5000000
 #define MAX_ARM_TIME 5000000
 
 //PID VALUES
-#define ROLL_PITCH_P 0.9
-#define ROLL_PITCH_I 0.7
+#define ROLL_PITCH_P 1.0
+#define ROLL_PITCH_I 0.9
 #define ROLL_PITCH_D 0.2
 #define ROLL_PITCH_P_GUARD 200
-#define ROLL_PITCH_I_GUARD 500
+#define ROLL_PITCH_I_GUARD 20
 
 #define YAW_P 10.0
 #define YAW_I 0
-#define YAW_D 0.1
+#define YAW_D 0
 
 #define SERVO_FILTER 0.6
+
+//Remote signal timeout: 1.5 seconds
+#define SIGNAL_TIMEOUT 1500000
 
 //PWM Values
 #define MINCOMMAND 1000

@@ -68,6 +68,13 @@ int smooth(int data, float filterVal, float smoothedVal){
   return (int)smoothedVal;
 }
 
+double getExpo(long input, float expo, int deviation){
+  float expoPitch = map(input, 1000, 2000, -1000, 1000) / 1000.0;
+  if(expoPitch >= 0)
+    return pow(abs(expoPitch), expo) * deviation;
+  return -pow(abs(expoPitch), expo) * deviation;
+}
+
 //http://aeroquad.com/showthread.php?1167-Stable-Mode-Explained
 void controllerLoop(){
   
@@ -75,14 +82,18 @@ void controllerLoop(){
   stableMode = 1400 < aux1.getValue() && 1600 > aux1.getValue();
   
   //Controls are backwards
-  targetYaw = map(rudder.getScaledValue(), 1000, 2000, -90, 90);
-  targetPitch = map(elevator.getScaledValue(), 1000, 2000, 45, -45);
-  targetRoll = map(aileron.getScaledValue(), 1000, 2000, 45, -45);
-  /*
-  targetYaw = 0;
-  targetPitch = 0;
-  targetRoll = 0;
-  */
+  //Apply exponentials, more sensitive controls around centered sticks
+  targetYaw = getExpo(rudder.getScaledValue(), EXPO_YAW, 90);
+  targetPitch = -getExpo(elevator.getScaledValue(), EXPO_ROLL_PITCH, 45);
+  targetRoll = -getExpo(aileron.getScaledValue(), EXPO_ROLL_PITCH, 45);
+  
+  //Override when signal is not present
+  if(!signalPresent){
+    stableMode = 1;
+    targetYaw = 0;
+    targetPitch = 0;
+    targetRoll = 0;
+  }
   
   if(stableMode){
     //Stable mode input

@@ -20,3 +20,9 @@ double outputYawStable;
 double outputRoll;
 double outputPitch;
 double outputYaw;
+
+bool signalPresent = 1;
+
+int throttleValue = 0;
+
+uint32_t armTime;
