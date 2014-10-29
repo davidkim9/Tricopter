@@ -69,24 +69,6 @@ void process10HzTask(){
   
   Serial.println();
   */
-  
-  if(armed){
-    //Check if throttle is off
-    if( throttle.getValue() < MIN_THROTTLE ){
-      
-      //If not flying anymore, check arm timer
-      if(inFlight){
-        armTime = currentTime;
-      }
-      inFlight = 0;
-      
-    }else{
-      inFlight = 1;
-    }
-  }
-}
-
-void process2HzTask(){
   if(!inFlight){
     //Listen for arm signal
     if(!armed){
@@ -117,6 +99,25 @@ void process2HzTask(){
     else
       digitalWrite(LED_PIN, LOW);
   }
+  
+  if(armed){
+    //Check if throttle is off
+    if( throttle.getValue() < MIN_THROTTLE ){
+      
+      //If not flying anymore, check arm timer
+      if(inFlight){
+        armTime = currentTime;
+      }
+      inFlight = 0;
+      
+    }else{
+      inFlight = 1;
+    }
+  }
+}
+
+void process2HzTask(){
+
 }
 
 void process1HzTask(){

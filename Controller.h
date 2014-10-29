@@ -35,7 +35,7 @@ void controllerSetup(){
   pidRateYaw.pGuard = 1000;
   pidRateYaw.windupGuard = 1000;
   
-  pidStableRoll.P = 0.5;
+  pidStableRoll.P = 1;
   pidStableRoll.I = 0;
   pidStableRoll.D = 0;
   pidStableRoll.lastError = 0;
@@ -44,7 +44,7 @@ void controllerSetup(){
   pidStableRoll.pGuard = 100;
   pidStableRoll.windupGuard = 500;
   
-  pidStablePitch.P = 0.5;
+  pidStablePitch.P = 1;
   pidStablePitch.I = 0;
   pidStablePitch.D = 0;
   pidStablePitch.lastError = 0;
@@ -83,9 +83,9 @@ void controllerLoop(){
   
   //Controls are backwards
   //Apply exponentials, more sensitive controls around centered sticks
-  targetYaw = getExpo(rudder.getScaledValue(), EXPO_YAW, 90);
-  targetPitch = -getExpo(elevator.getScaledValue(), EXPO_ROLL_PITCH, 45);
-  targetRoll = -getExpo(aileron.getScaledValue(), EXPO_ROLL_PITCH, 45);
+  targetYaw = getExpo(rudder.getScaledValue(), EXPO_YAW, 360);
+  targetPitch = -getExpo(elevator.getScaledValue(), EXPO_ROLL_PITCH, 55);
+  targetRoll = -getExpo(aileron.getScaledValue(), EXPO_ROLL_PITCH, 55);
   
   //Override when signal is not present
   if(!signalPresent){
@@ -113,7 +113,7 @@ void controllerLoop(){
   //Without this, the rear servo will jitter on tricopters
   outputYaw = smooth(outputYaw, SERVO_FILTER, yawSmooth);
   
-  outputRoll = constrain(outputRoll, -200, 200);
-  outputPitch = constrain(outputPitch, -200, 200);
-  outputYaw = constrain(outputYaw, -300, 300);
+  outputRoll = constrain(outputRoll, -300, 300);
+  outputPitch = constrain(outputPitch, -300, 300);
+  outputYaw = constrain(outputYaw, -320, 320);
 }

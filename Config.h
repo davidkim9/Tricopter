@@ -21,8 +21,8 @@
 #define RUDDER_TRIM -8
 
 //Exponential x^EXPO
-#define EXPO_ROLL_PITCH 2.2
-#define EXPO_YAW 1.5
+#define EXPO_ROLL_PITCH 1.0
+#define EXPO_YAW 1.0
 
 //Microseconds, 5 seconds = 5000000
 #define MAX_ARM_TIME 5000000
@@ -34,11 +34,11 @@
 #define ROLL_PITCH_P_GUARD 200
 #define ROLL_PITCH_I_GUARD 20
 
-#define YAW_P 10.0
+#define YAW_P 7.0
 #define YAW_I 0
-#define YAW_D 0
+#define YAW_D 0.1
 
-#define SERVO_FILTER 0.6
+#define SERVO_FILTER 0.65
 
 //Remote signal timeout: 1.5 seconds
 #define SIGNAL_TIMEOUT 1500000

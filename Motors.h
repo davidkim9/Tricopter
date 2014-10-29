@@ -50,7 +50,7 @@ void motorsLoop(){
     int frontLeftValue = throttleValue - outputRoll + outputPitch*2/3;
     int frontRightValue = throttleValue + outputRoll + outputPitch*2/3;
     int rearValue = throttleValue - outputPitch*4/3;
-    int yawCommand = constrain(MIDCOMMAND - outputYaw, 1200, 1800);
+    int yawCommand = constrain(MIDCOMMAND - outputYaw, 1100, 1900);
     
     //Make sure the motors dont turn off in flight and PWM size isnt greater than 2000
     frontLeftValue = constrain(frontLeftValue, MINTHRUST, MAXCOMMAND);
