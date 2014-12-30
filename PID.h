@@ -24,6 +24,7 @@ double updatePID(double targetPosition, double currentPosition, struct PIDdata *
     PIDparameters->integratedError += error * deltaPIDTime;
   } else {
     PIDparameters->integratedError = 0.0;
+    PIDparameters->lastError = 0.0;
   }
   
   PIDparameters->integratedError = constrain(PIDparameters->integratedError, -PIDparameters->windupGuard, PIDparameters->windupGuard);

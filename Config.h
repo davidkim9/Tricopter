@@ -28,15 +28,15 @@
 #define MAX_ARM_TIME 5000000
 
 //PID VALUES
-#define ROLL_PITCH_P 1.0
-#define ROLL_PITCH_I 0.9
-#define ROLL_PITCH_D 0.2
-#define ROLL_PITCH_P_GUARD 200
-#define ROLL_PITCH_I_GUARD 20
+#define ROLL_PITCH_P 1.4
+#define ROLL_PITCH_I 0.8
+#define ROLL_PITCH_D -4.0
+#define ROLL_PITCH_P_GUARD 500
+#define ROLL_PITCH_I_GUARD 200
 
 #define YAW_P 7.0
-#define YAW_I 0
-#define YAW_D 0.1
+#define YAW_I 0.1
+#define YAW_D 0.0
 
 #define SERVO_FILTER 0.65
 

@@ -2,6 +2,10 @@ PIDdata pidRateRoll;
 PIDdata pidRatePitch;
 PIDdata pidRateYaw;
 
+PIDdata pidStableRateRoll;
+PIDdata pidStableRatePitch;
+PIDdata pidStableRateYaw;
+
 PIDdata pidStableRoll;
 PIDdata pidStablePitch;
 PIDdata pidStableYaw;
@@ -34,6 +38,25 @@ void controllerSetup(){
   pidRateYaw.integratedError = 0;
   pidRateYaw.pGuard = 1000;
   pidRateYaw.windupGuard = 1000;
+  
+  //Stable mode rates
+  pidStableRateRoll.P = ROLL_PITCH_P;
+  pidStableRateRoll.I = 0;
+  pidStableRateRoll.D = ROLL_PITCH_D;
+  pidStableRateRoll.lastError = 0;
+  pidStableRateRoll.previousPIDTime = 0;
+  pidStableRateRoll.integratedError = 0;
+  pidStableRateRoll.pGuard = ROLL_PITCH_P_GUARD;
+  pidStableRateRoll.windupGuard = ROLL_PITCH_I_GUARD;
+  
+  pidStableRatePitch.P = ROLL_PITCH_P;
+  pidStableRatePitch.I = 0;
+  pidStableRatePitch.D = ROLL_PITCH_D;
+  pidStableRatePitch.lastError = 0;
+  pidStableRatePitch.previousPIDTime = 0;
+  pidStableRatePitch.integratedError = 0;
+  pidStableRatePitch.pGuard = ROLL_PITCH_P_GUARD;
+  pidStableRatePitch.windupGuard = ROLL_PITCH_I_GUARD;
   
   pidStableRoll.P = 1;
   pidStableRoll.I = 0;
@@ -84,8 +107,8 @@ void controllerLoop(){
   //Controls are backwards
   //Apply exponentials, more sensitive controls around centered sticks
   targetYaw = getExpo(rudder.getScaledValue(), EXPO_YAW, 360);
-  targetPitch = -getExpo(elevator.getScaledValue(), EXPO_ROLL_PITCH, 55);
-  targetRoll = -getExpo(aileron.getScaledValue(), EXPO_ROLL_PITCH, 55);
+  targetPitch = -getExpo(elevator.getScaledValue(), EXPO_ROLL_PITCH, 60);
+  targetRoll = -getExpo(aileron.getScaledValue(), EXPO_ROLL_PITCH, 60);
   
   //Override when signal is not present
   if(!signalPresent){
@@ -100,9 +123,15 @@ void controllerLoop(){
     outputRoll = updatePID(targetRoll, yprAngle[2], &pidStableRoll);
     outputPitch = updatePID(targetPitch, yprAngle[1], &pidStablePitch);
     //Gyro
-    outputRoll = updatePID(outputRoll, -gx, &pidRateRoll);
-    outputPitch = updatePID(outputPitch, gy, &pidRatePitch);
-    outputYaw = updatePID(targetYaw, -gz, &pidRateYaw);
+    outputRoll = updatePID(outputRoll, -gx, &pidStableRateRoll);
+    outputPitch = updatePID(outputPitch, gy, &pidStableRatePitch);
+    outputYaw = updatePID(targetYaw, -gz, &pidStableRateYaw);
+    
+    //Reset error on rate mode
+    pidRateRoll.integratedError = 0;
+    pidRatePitch.integratedError = 0;
+    pidRateYaw.integratedError = 0;
+    
   }else{
     outputRoll = updatePID(targetRoll, -gx, &pidRateRoll);
     outputPitch = updatePID(targetPitch, gy, &pidRatePitch);
@@ -113,7 +142,7 @@ void controllerLoop(){
   //Without this, the rear servo will jitter on tricopters
   outputYaw = smooth(outputYaw, SERVO_FILTER, yawSmooth);
   
-  outputRoll = constrain(outputRoll, -300, 300);
-  outputPitch = constrain(outputPitch, -300, 300);
+  outputRoll = constrain(outputRoll, -500, 500);
+  outputPitch = constrain(outputPitch, -500, 500);
   outputYaw = constrain(outputYaw, -320, 320);
 }

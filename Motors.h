@@ -62,15 +62,24 @@ void motorsLoop(){
     analogWrite(REAR_MOTOR_OUT_PIN, rearValue / 8);
     
     atomicServo = (yawCommand-1000)/4;
-    /*
+    
     Serial.print(frontLeftValue); Serial.print('\t');
     Serial.print(frontRightValue); Serial.print('\t');
+    Serial.print(rearValue); Serial.print('\t');
     
     Serial.print(outputRoll); Serial.print('\t');
+    Serial.print(outputPitch); Serial.print('\t');
     Serial.print(outputYaw); Serial.print('\t');
     
+    Serial.print(throttle.getScaledValue()); Serial.print('\t');
+    Serial.print(rudder.getScaledValue()); Serial.print('\t');
+    Serial.print(aileron.getScaledValue()); Serial.print('\t');
+    Serial.print(elevator.getScaledValue()); Serial.print('\t');
+    
+    
+    
     Serial.println();
-    */
+    
   }else{
     //Turn off motors
     analogWrite(LEFT_MOTOR_OUT_PIN, MINCOMMAND / 8);
